@@ -43,5 +43,23 @@ function render(){
     body.appendChild(library);
 }
 
-addBookToLibrary();
+let newBook = document.createElement('button');
+newBook.classList.add('new-book');
+newBook.textContent = "+";
+newBook.addEventListener('click', e => {
+    let form = document.createElement('form');
+    ["title", "author", "pages"].forEach( prop => {
+    let propLabel = document.createElement('label');
+    propLabel.setAttribute("for", prop);
+    let propInput = document.createElement('input');
+    propInput.setAttribute("type", "text");
+    propInput.setAttribute("id", prop);
+    propInput.setAttribute("name", prop);
+    form.appendChild(propLabel);
+    form.appendChild(propInput);
+    body.appendChild(form);
+    });
+});
+body.appendChild(newBook);
+
 render();
