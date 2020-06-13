@@ -1,5 +1,6 @@
-let myLibrary = [];
+let myLibrary = (localStorage.getItem("myLibrary")) ? JSON.parse(localStorage.getItem("myLibrary")) : [];
 let body = document.querySelector('body');
+let newAddition = false;
 
 function Book(title, author, pages, read){
     this.title = title;
@@ -9,11 +10,20 @@ function Book(title, author, pages, read){
     this.info = function(){
         return `${title}, by ${author}, ${pages} pages.` + (read ? " Already read." : "Not read yet.");  
     };
+    this.toggleRead = function(){
+        this.read = !this.read
+    };
 }
 
 function addBookToLibrary(title, author, pages, read){
     let newBook = new Book(title, author, pages, read);
     myLibrary.push(newBook);
+}
+
+function clear(){
+    while (body.firstChild){
+        body.removeChild(body.lastChild);
+    }
 }
 
 function render(){
@@ -24,42 +34,93 @@ function render(){
     ["title", "author", "pages", "read"].forEach( prop => {
         let propHeader = document.createElement('th');
         propHeader.style.cssText = "border: 1px solid black; font-weight: bold; width: 70px;";
-        propHeader.textContent = prop[0].toUpperCase() + prop.slice(1);
+        propHeader.textContent = prop.charAt(0).toUpperCase() + prop.slice(1);
         headerRow.appendChild(propHeader);
     });
     library.appendChild(headerRow);
     myLibrary.forEach(book => {
         let newRow = document.createElement('tr');
         Object.keys(book).forEach( prop => {
-            if (prop != "info"){
+            if (prop != "info" && prop != "toggleRead"){
                 let propValue = document.createElement('td');
                 propValue.style.cssText = "border: 1px solid black; text-align: center;"
                 propValue.textContent = book[prop];
+
+                if (prop == "read"){
+                    newRow.addEventListener('click', e => { book.toggleRead(); clear(); render();});
+                }
+
                 newRow.appendChild(propValue);
                 library.appendChild(newRow);
             }
         });
     });
     body.appendChild(library);
-}
 
-let newBook = document.createElement('button');
-newBook.classList.add('new-book');
-newBook.textContent = "+";
-newBook.addEventListener('click', e => {
-    let form = document.createElement('form');
-    ["title", "author", "pages"].forEach( prop => {
-    let propLabel = document.createElement('label');
-    propLabel.setAttribute("for", prop);
-    let propInput = document.createElement('input');
-    propInput.setAttribute("type", "text");
-    propInput.setAttribute("id", prop);
-    propInput.setAttribute("name", prop);
-    form.appendChild(propLabel);
-    form.appendChild(propInput);
-    body.appendChild(form);
+    myLibrary.forEach(book => {
+        let deleteButton = document.createElement('button');
+        deleteButton.textContent = "-";
+        deleteButton.addEventListener('click', e => {
+            myLibrary.pop(book);
+            clear();
+            render();
+        })
+        body.appendChild(deleteButton);
+    })
+
+    let newBook = document.createElement('button');
+    newBook.classList.add('new-book');
+    newBook.textContent = "+";
+    newBook.addEventListener('click', e => {
+        if (!newAddition){
+            newAddition = true;
+            let form = document.createElement('form');
+            ["title", "author", "pages"].forEach( prop => {
+            let propLabel = document.createElement('label');
+            propLabel.setAttribute("for", prop);
+            propLabel.textContent = prop.charAt(0).toUpperCase() + prop.slice(1);
+            let propInput = document.createElement('input');
+            propInput.setAttribute("type", "text");
+            propInput.setAttribute("id", prop);
+            propInput.setAttribute("name", prop);
+            form.appendChild(propLabel);
+            form.appendChild(propInput);
+            });
+
+            let readTrueLabel = document.createElement('label');
+            readTrueLabel.setAttribute("for", "true");
+            readTrueLabel.textContent = "Already read"
+            let readTrueInput = document.createElement('input');
+            readTrueInput.setAttribute("type", "checkbox");
+            readTrueInput.setAttribute("name", "read");
+            readTrueInput.setAttribute("value", "true");
+            readTrueInput.setAttribute("id", "read");
+            form.appendChild(readTrueLabel);
+            form.appendChild(readTrueInput);
+
+            let submit = document.createElement('button');
+            submit.addEventListener('click', e => {
+                let title = document.getElementById("title").value;
+                let author = document.getElementById("author").value;
+                let pages = document.getElementById("pages").value;
+                let readTrue = document.getElementById("read").checked;
+                console.log(readTrue)
+                if (title && author && +pages){
+                    addBookToLibrary(title, author, pages, readTrue);
+                    newAddition = false;
+                    clear();
+                    render();
+                }
+            });
+            
+            body.appendChild(form);
+            body.append(submit);
+        }
+
     });
-});
-body.appendChild(newBook);
+    console.log(JSON.stringify(myLibrary));
+    localStorage.setItem("myLibrary", JSON.stringify(myLibrary));
+    body.appendChild(newBook);
+}
 
 render();
