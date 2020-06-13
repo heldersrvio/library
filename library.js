@@ -10,9 +10,6 @@ function Book(title, author, pages, read){
     this.info = function(){
         return `${title}, by ${author}, ${pages} pages.` + (read ? " Already read." : "Not read yet.");  
     };
-    this.toggleRead = function(){
-        this.read = !this.read
-    };
 }
 
 function addBookToLibrary(title, author, pages, read){
@@ -27,9 +24,14 @@ function clear(){
 }
 
 function render(){
+
+    let h1 = document.createElement('h1');
+    h1.textContent = "Library";
+    body.appendChild(h1);
+
     let library = document.createElement('table');
     library.style.width = "100%";
-    library.style.cssText = "margin-right: auto; margin-left: auto; margin-top: 50px; border: 1px solid black;"
+    library.style.cssText = "margin-top: 50px; border: 1px solid black;"
     let headerRow = document.createElement('tr');
     ["title", "author", "pages", "read"].forEach( prop => {
         let propHeader = document.createElement('th');
@@ -47,7 +49,7 @@ function render(){
                 propValue.textContent = book[prop];
 
                 if (prop == "read"){
-                    newRow.addEventListener('click', e => { book.toggleRead(); clear(); render();});
+                    newRow.addEventListener('click', e => { book.read = !book.read; localStorage.setItem("myLibrary", JSON.stringify(myLibrary)); clear(); render();});
                 }
 
                 newRow.appendChild(propValue);
@@ -55,22 +57,31 @@ function render(){
             }
         });
     });
-    body.appendChild(library);
+    let tablePlusButtons = document.createElement('div');
+    tablePlusButtons.classList.add('table-and-buttons');
+    tablePlusButtons.appendChild(library);
+
+    let removeButtons = document.createElement('div');
+    removeButtons.classList.add('remove-buttons');
 
     myLibrary.forEach(book => {
         let deleteButton = document.createElement('button');
         deleteButton.textContent = "-";
         deleteButton.addEventListener('click', e => {
-            myLibrary.pop(book);
+            myLibrary = myLibrary.filter((v) => {
+                return v.title != book.title;
+            });
             clear();
             render();
         })
-        body.appendChild(deleteButton);
+        removeButtons.appendChild(deleteButton);
     })
+    tablePlusButtons.appendChild(removeButtons);
+    body.appendChild(tablePlusButtons);
 
     let newBook = document.createElement('button');
     newBook.classList.add('new-book');
-    newBook.textContent = "+";
+    newBook.textContent = "Add New Book";
     newBook.addEventListener('click', e => {
         if (!newAddition){
             newAddition = true;
@@ -107,11 +118,15 @@ function render(){
                 console.log(readTrue)
                 if (title && author && +pages){
                     addBookToLibrary(title, author, pages, readTrue);
+                    localStorage.setItem("myLibrary", JSON.stringify(myLibrary));
                     newAddition = false;
                     clear();
                     render();
                 }
             });
+            submit.textContent = "Done";
+            submit.style["margin-top"] = "3px";
+            submit.style["margin-bottom"] = "15px";
             
             body.appendChild(form);
             body.append(submit);
