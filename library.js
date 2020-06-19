@@ -2,12 +2,14 @@ let myLibrary = (localStorage.getItem("myLibrary")) ? JSON.parse(localStorage.ge
 let body = document.querySelector('body');
 let newAddition = false;
 
-function Book(title, author, pages, read){
-    this.title = title;
-    this.author = author;
-    this.pages = pages;
-    this.read = read;
-    this.info = function(){
+class Book{
+    constructor(title, author, pages, read){
+        this.title = title;
+        this.author = author;
+        this.pages = pages;
+        this.read = read;
+    }
+    info(){
         return `${title}, by ${author}, ${pages} pages.` + (read ? " Already read." : "Not read yet.");  
     };
 }
