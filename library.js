@@ -94,8 +94,13 @@ function render(){
             propLabel.textContent = prop.charAt(0).toUpperCase() + prop.slice(1);
             let propInput = document.createElement('input');
             propInput.setAttribute("type", "text");
+            if (prop === "pages") {
+                propInput.setAttribute("type", "number");
+                propInput.setAttribute("min", 1);
+            }
             propInput.setAttribute("id", prop);
             propInput.setAttribute("name", prop);
+            propInput.required = true;
             form.appendChild(propLabel);
             form.appendChild(propInput);
             });
@@ -111,6 +116,8 @@ function render(){
             form.appendChild(readTrueLabel);
             form.appendChild(readTrueInput);
 
+            let bottom = document.createElement('div');
+            bottom.setAttribute("id", "bottom");
             let submit = document.createElement('button');
             submit.addEventListener('click', e => {
                 let title = document.getElementById("title").value;
@@ -124,14 +131,30 @@ function render(){
                     newAddition = false;
                     clear();
                     render();
+                } else {
+                    let span = document.querySelector("span");
+                    if (!document.getElementById("title").checkValidity()) {
+                        span.textContent = "Fill the title of the book.";
+                    } else if (!document.getElementById("author").checkValidity()) {
+                        span.textContent = "Fill the name of the author.";
+                    } else if (document.getElementById("pages").validity.valueMissing) {
+                        span.textContent = "Fill the number of pages.";
+                    } else {
+                        span.textContent = "The number of pages is invalid.";
+                    }
                 }
             });
             submit.textContent = "Done";
             submit.style["margin-top"] = "3px";
             submit.style["margin-bottom"] = "15px";
+            bottom.appendChild(submit);
+
+            let errorMessage = document.createElement('span');
+            errorMessage.textContent = "";
+            bottom.appendChild(errorMessage);
             
             body.appendChild(form);
-            body.append(submit);
+            body.append(bottom);
         }
 
     });
